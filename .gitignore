@@ -1,0 +1,11 @@
+# Design handoff files
+handoff/
+*.zip
+
+# Test artifacts
+.playwright-mcp/
+*.png
+
+# System
+.DS_Store
+Thumbs.db
