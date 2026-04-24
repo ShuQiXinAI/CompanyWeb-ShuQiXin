@@ -156,7 +156,7 @@ const ParticleFlow = ({ accent = '#4DD4AC' }) => {
 
 /* ───────────────────────── Nav ───────────────────────── */
 
-const Nav = ({ accent }) => {
+const Nav = ({ accent, user, onLogout }) => {
   const [scrolled, setScrolled] = React.useState(false);
   const [active, setActive] = React.useState('home');
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -208,18 +208,39 @@ const Nav = ({ accent }) => {
           }}>{it.zh}</a>
         ))}
       </div>
-      <a href="#contact" style={{
-        display:'inline-flex', alignItems:'center', gap:8,
-        padding:'10px 20px', borderRadius:999,
-        border:`1px solid ${accent}`, color:accent, fontSize:13, letterSpacing:'0.08em', fontWeight:500,
-        transition:'all 0.2s',
-      }}
-      onMouseEnter={e=>{e.currentTarget.style.background=accent;e.currentTarget.style.color='#0E1A2E'}}
-      onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color=accent}}
-      >
-        开始合作
-        <span style={{fontSize:16,lineHeight:1}}>→</span>
-      </a>
+      {user ? (
+        <div style={{display:'flex', alignItems:'center', gap:12}}>
+          <div className="mono" style={{
+            fontSize:12, color:'var(--text-2)', letterSpacing:'0.08em',
+            padding:'6px 12px', borderRadius:999,
+            background:'rgba(27,49,82,0.6)', border:'1px solid var(--line)',
+          }}>
+            用户 *{user.phone.slice(-4)}
+          </div>
+          <button onClick={onLogout} style={{
+            display:'inline-flex', alignItems:'center', gap:6,
+            padding:'9px 16px', borderRadius:999,
+            border:'1px solid rgba(150,200,235,0.2)', color:'var(--text-3)', fontSize:12, letterSpacing:'0.1em',
+            transition:'all 0.2s',
+          }}
+          onMouseEnter={e=>{e.currentTarget.style.borderColor='#F87171';e.currentTarget.style.color='#F87171'}}
+          onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(150,200,235,0.2)';e.currentTarget.style.color='var(--text-3)'}}
+          >退出</button>
+        </div>
+      ) : (
+        <a href="/login.html" style={{
+          display:'inline-flex', alignItems:'center', gap:8,
+          padding:'10px 20px', borderRadius:999,
+          border:`1px solid ${accent}`, color:accent, fontSize:13, letterSpacing:'0.08em', fontWeight:500,
+          transition:'all 0.2s',
+        }}
+        onMouseEnter={e=>{e.currentTarget.style.background=accent;e.currentTarget.style.color='#0E1A2E'}}
+        onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color=accent}}
+        >
+          开始合作
+          <span style={{fontSize:16,lineHeight:1}}>→</span>
+        </a>
+      )}
     </nav>
   );
 };
@@ -1074,11 +1095,42 @@ const Contact = ({ accent }) => {
 
 /* ───────────────────────── App Root ───────────────────────── */
 
+const API_BASE = 'http://8.130.166.83:8080';
+
 const App = () => {
   const accent = '#4DD4AC';
+  const [user, setUser] = React.useState(null);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('token');
+    const phone = localStorage.getItem('phone');
+    if (!token || !phone) return;
+    setUser({ phone });
+    fetch(API_BASE + '/api/auth/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+      .then(r => r.json())
+      .then(res => {
+        if (res.code === 200) {
+          setUser({ phone: res.data.phone });
+        } else {
+          localStorage.removeItem('token');
+          localStorage.removeItem('phone');
+          setUser(null);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('phone');
+    setUser(null);
+  };
+
   return (
     <div style={{position:'relative', zIndex:2}}>
-      <Nav accent={accent}/>
+      <Nav accent={accent} user={user} onLogout={handleLogout}/>
       <Hero accent={accent}/>
       <Services accent={accent}/>
       <Product accent={accent}/>
