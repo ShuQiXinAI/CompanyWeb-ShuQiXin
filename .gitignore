@@ -9,3 +9,13 @@ handoff/
 # System
 .DS_Store
 Thumbs.db
+
+# Superpowers brainstorming
+.superpowers/
+
+# Claude local settings
+.claude/
+
+# Maven build output
+backend/target/
+
