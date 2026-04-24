@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 · 数启欣 ShuQiXin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0E1A2E;
+    --bg-2: #162844;
+    --surface: #1B3152;
+    --surface-2: #243E63;
+    --line: rgba(150, 200, 235, 0.14);
+    --line-strong: rgba(150, 200, 235, 0.24);
+    --text: #F1F5F9;
+    --text-2: #A3B3C8;
+    --text-3: #7A8BA5;
+    --accent: #4DD4AC;
+    --accent-2: #22D3EE;
+    --accent-3: #60A5FA;
+    --danger: #F87171;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased}
+  html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk','Noto Sans SC',system-ui,sans-serif;overflow-x:hidden}
+  body{min-height:100vh}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input{font-family:inherit;color:inherit;outline:none;border:none;background:none}
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus{
+    -webkit-text-fill-color: var(--text);
+    -webkit-box-shadow: 0 0 0 1000px transparent inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+  .mono{font-family:'JetBrains Mono',monospace}
+  .serif{font-family:'Noto Serif SC',serif}
+  ::selection{background:var(--accent);color:#000}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--surface-2);border-radius:10px}
+  ::-webkit-scrollbar-thumb:hover{background:#2E4A6E}
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+  body::after{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%, rgba(77,212,172,0.08), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 20% 100%, rgba(34,211,238,0.06), transparent 60%),
+      linear-gradient(rgba(150,200,235,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(150,200,235,0.02) 1px, transparent 1px);
+    background-size: auto, auto, 60px 60px, 60px 60px;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <script type="text/babel">
+const API_BASE = 'http://8.130.166.83:8080';
+
+const LogoA = ({ size = 36, accent = '#4DD4AC' }) => (
+  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="la-g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor={accent}/>
+        <stop offset="1" stopColor="#22D3EE"/>
+      </linearGradient>
+    </defs>
+    <rect x="2" y="2" width="44" height="44" rx="10" stroke="rgba(255,255,255,0.08)" strokeWidth="1"/>
+    <rect x="9" y="11" width="12" height="2" rx="1" fill={accent}/>
+    <rect x="9" y="17" width="12" height="2" rx="1" fill={accent} opacity="0.75"/>
+    <rect x="9" y="23" width="12" height="2" rx="1" fill={accent} opacity="0.5"/>
+    <rect x="14" y="11" width="2" height="26" rx="1" fill={accent} opacity="0.9"/>
+    <path d="M25 31 L31 23 L37 27 L43 15" stroke="url(#la-g)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    <circle cx="25" cy="31" r="1.8" fill={accent}/>
+    <circle cx="43" cy="15" r="2.2" fill="#22D3EE"/>
+    <rect x="9" y="34" width="16" height="2" rx="1" fill={accent} opacity="0.6"/>
+  </svg>
+);
+
+const Field = ({ label, mono, type='text', value, onChange, placeholder, autoComplete, accent }) => {
+  const [focused, setFocused] = React.useState(false);
+  return (
+    <div style={{marginBottom:22}}>
+      <div className="mono" style={{
+        fontSize:11, letterSpacing:'0.18em', textTransform:'uppercase',
+        color:'var(--text-3)', marginBottom:10,
+      }}>{label} <span style={{color:'var(--line-strong)'}}>/</span> <span style={{color:'var(--text-3)',opacity:0.7}}>{mono}</span></div>
+      <div style={{
+        position:'relative',
+        borderBottom:`1px solid ${focused ? accent : 'var(--line-strong)'}`,
+        transition:'border-color 0.25s',
+      }}>
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          onFocus={()=>setFocused(true)}
+          onBlur={()=>setFocused(false)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          style={{
+            width:'100%', padding:'12px 2px', fontSize:15,
+            color:'var(--text)', letterSpacing:'0.02em',
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
+const LoginApp = () => {
+  const accent = '#4DD4AC';
+  const [phone, setPhone] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const validate = () => {
+    if (!/^1[3-9]\d{9}$/.test(phone)) return '请输入有效的 11 位手机号码';
+    if (!password) return '请输入密码';
+    return '';
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    const err = validate();
+    if (err) { setError(err); return; }
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch(API_BASE + '/api/auth/login', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ phone, password }),
+      });
+      const data = await res.json();
+      if (data.code === 200) {
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('phone', data.data.phone);
+        window.location.href = '/index.html';
+      } else {
+        setError(data.message || '登录失败');
+      }
+    } catch (ex) {
+      setError('网络异常，请稍后重试');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{position:'relative', zIndex:2, minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'24px'}}>
+      <a href="/index.html" style={{
+        position:'fixed', top:24, left:28, zIndex:10,
+        display:'inline-flex', alignItems:'center', gap:8,
+        fontSize:13, letterSpacing:'0.08em', color:'var(--text-3)',
+        padding:'8px 14px', borderRadius:999,
+        border:'1px solid var(--line)', background:'rgba(27,49,82,0.3)',
+        backdropFilter:'blur(12px)', WebkitBackdropFilter:'blur(12px)',
+        transition:'all 0.2s',
+      }}
+      onMouseEnter={e=>{e.currentTarget.style.color='var(--text)';e.currentTarget.style.borderColor='var(--line-strong)'}}
+      onMouseLeave={e=>{e.currentTarget.style.color='var(--text-3)';e.currentTarget.style.borderColor='var(--line)'}}
+      >
+        <span style={{fontSize:16, lineHeight:1}}>←</span> 返回首页
+      </a>
+
+      <div style={{
+        width:'100%', maxWidth:420,
+        padding:'44px 40px 40px',
+        background:'rgba(27,49,82,0.45)',
+        border:'1px solid var(--line-strong)',
+        borderRadius:20,
+        backdropFilter:'blur(24px) saturate(1.2)',
+        WebkitBackdropFilter:'blur(24px) saturate(1.2)',
+        boxShadow:'0 30px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)',
+        animation:'fadeIn 0.6s ease-out',
+      }}>
+        <div style={{display:'flex', justifyContent:'center', marginBottom:22}}>
+          <LogoA size={44} accent={accent}/>
+        </div>
+        <div className="serif" style={{
+          fontSize:24, fontWeight:700, color:'#F8FAFC',
+          textAlign:'center', letterSpacing:'0.06em', marginBottom:8,
+        }}>欢迎回来</div>
+        <div style={{
+          fontSize:13, color:'var(--text-3)', textAlign:'center',
+          letterSpacing:'0.05em', marginBottom:36,
+        }}>登录你的数启欣账号</div>
+
+        <form onSubmit={onSubmit}>
+          <Field
+            label="手机号" mono="PHONE"
+            type="tel"
+            value={phone}
+            onChange={e=>setPhone(e.target.value.trim())}
+            placeholder="请输入手机号"
+            autoComplete="username"
+            accent={accent}
+          />
+          <Field
+            label="密码" mono="PASSWORD"
+            type="password"
+            value={password}
+            onChange={e=>setPassword(e.target.value)}
+            placeholder="请输入密码"
+            autoComplete="current-password"
+            accent={accent}
+          />
+
+          <button type="submit" disabled={loading} style={{
+            width:'100%', marginTop:14,
+            padding:'14px', borderRadius:12,
+            background: loading ? 'rgba(77,212,172,0.55)' : accent,
+            color:'#0E1A2E', fontSize:14, fontWeight:600,
+            letterSpacing:'0.12em',
+            display:'inline-flex', alignItems:'center', justifyContent:'center', gap:8,
+            transition:'all 0.2s',
+            cursor: loading ? 'wait' : 'pointer',
+          }}
+          onMouseEnter={e=>{ if(!loading) e.currentTarget.style.boxShadow='0 10px 30px rgba(77,212,172,0.35)'; }}
+          onMouseLeave={e=>{ e.currentTarget.style.boxShadow='none'; }}
+          >
+            {loading ? '登录中...' : '登录'}
+            {!loading && <span style={{fontSize:16,lineHeight:1}}>→</span>}
+          </button>
+
+          {error && (
+            <div style={{
+              marginTop:16, padding:'10px 14px',
+              borderRadius:8, fontSize:13,
+              color:'var(--danger)',
+              background:'rgba(248,113,113,0.08)',
+              border:'1px solid rgba(248,113,113,0.2)',
+              textAlign:'center', letterSpacing:'0.04em',
+            }}>{error}</div>
+          )}
+        </form>
+
+        <div style={{
+          marginTop:28, paddingTop:22,
+          borderTop:'1px solid var(--line)',
+          textAlign:'center', fontSize:13, color:'var(--text-3)',
+          letterSpacing:'0.04em',
+        }}>
+          还没有账号？
+          <a href="/register.html" style={{
+            color:accent, marginLeft:6, fontWeight:500,
+            transition:'opacity 0.2s',
+          }}
+          onMouseEnter={e=>{e.currentTarget.style.opacity=0.75}}
+          onMouseLeave={e=>{e.currentTarget.style.opacity=1}}
+          >立即注册 <span style={{fontSize:14}}>→</span></a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<LoginApp/>);
+  </script>
+</body>
+</html>
