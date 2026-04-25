@@ -228,18 +228,31 @@ const Nav = ({ accent, user, onLogout }) => {
           >退出</button>
         </div>
       ) : (
-        <a href="/login.html" style={{
-          display:'inline-flex', alignItems:'center', gap:8,
-          padding:'10px 20px', borderRadius:999,
-          border:`1px solid ${accent}`, color:accent, fontSize:13, letterSpacing:'0.08em', fontWeight:500,
-          transition:'all 0.2s',
-        }}
-        onMouseEnter={e=>{e.currentTarget.style.background=accent;e.currentTarget.style.color='#0E1A2E'}}
-        onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color=accent}}
-        >
-          开始合作
-          <span style={{fontSize:16,lineHeight:1}}>→</span>
-        </a>
+        <div style={{display:'flex', alignItems:'center', gap:10}}>
+          <a href="/login.html" style={{
+            display:'inline-flex', alignItems:'center',
+            padding:'10px 18px', borderRadius:999,
+            color:'var(--text-2)', fontSize:13, letterSpacing:'0.08em', fontWeight:500,
+            border:'1px solid transparent',
+            transition:'all 0.2s',
+          }}
+          onMouseEnter={e=>{e.currentTarget.style.color='var(--text)';e.currentTarget.style.borderColor='var(--line-strong)'}}
+          onMouseLeave={e=>{e.currentTarget.style.color='var(--text-2)';e.currentTarget.style.borderColor='transparent'}}
+          >登录</a>
+          <a href="/register.html" style={{
+            display:'inline-flex', alignItems:'center', gap:8,
+            padding:'10px 20px', borderRadius:999,
+            border:`1px solid ${accent}`, background:accent, color:'#0E1A2E',
+            fontSize:13, letterSpacing:'0.08em', fontWeight:600,
+            transition:'all 0.2s',
+          }}
+          onMouseEnter={e=>{e.currentTarget.style.boxShadow='0 8px 24px rgba(77,212,172,0.35)';e.currentTarget.style.transform='translateY(-1px)'}}
+          onMouseLeave={e=>{e.currentTarget.style.boxShadow='none';e.currentTarget.style.transform='translateY(0)'}}
+          >
+            注册
+            <span style={{fontSize:16,lineHeight:1}}>→</span>
+          </a>
+        </div>
       )}
     </nav>
   );
