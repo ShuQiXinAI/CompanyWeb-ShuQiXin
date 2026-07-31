@@ -164,12 +164,13 @@ const Nav = ({ accent, user, onLogout }) => {
   React.useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 20);
-      const sections = ['home','services','product','vision','culture','about','contact'];
+      // case（船舶案例）没有独立导航项，归到「产品」下高亮
+      const sections = ['home','services','product','case','vision','culture','about','contact'];
       const y = window.scrollY + window.innerHeight * 0.35;
       for (const id of sections) {
         const el = document.getElementById(id);
         if (el && el.offsetTop <= y && el.offsetTop + el.offsetHeight > y) {
-          setActive(id); break;
+          setActive(id === 'case' ? 'product' : id); break;
         }
       }
     };
@@ -512,7 +513,248 @@ const Services = ({ accent }) => {
   );
 };
 
-/* ───────────────────────── Product ───────────────────────── */
+/* ───────────────────────── Product · 嗒搭 ───────────────────────── */
+
+const DADA = '#FF7A45';
+
+const dadaFeatures = [
+  {
+    zh: '同城搭子匹配', en: 'LOCAL MATCHING',
+    icon: (c) => (
+      <svg viewBox="0 0 48 48" width="28" height="28" fill="none">
+        <path d="M24 42s13-11.4 13-21a13 13 0 1 0-26 0c0 9.6 13 21 13 21Z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+        <circle cx="24" cy="20" r="5" stroke={c} strokeWidth="1.5"/>
+      </svg>
+    ),
+    desc: '以同城范围为半径，结合运动项目、水平与常去场馆推荐搭子，看到的都是真正约得上的人。',
+  },
+  {
+    zh: '即时通讯', en: 'INSTANT MESSAGING',
+    icon: (c) => (
+      <svg viewBox="0 0 48 48" width="28" height="28" fill="none">
+        <path d="M9 12h30v21H25l-9 7v-7H9z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M16 20h16M16 26h10" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    desc: '一对一私聊与运动群聊，时间、场地、费用在 APP 内一次谈妥，不必再跳到别处沟通。',
+  },
+  {
+    zh: '个人主页', en: 'PROFILE',
+    icon: (c) => (
+      <svg viewBox="0 0 48 48" width="28" height="28" fill="none">
+        <rect x="8" y="9" width="32" height="30" rx="4" stroke={c} strokeWidth="1.5"/>
+        <circle cx="19" cy="20" r="4.5" stroke={c} strokeWidth="1.5"/>
+        <path d="M12 32c1.6-3.4 4-5.1 7-5.1s5.4 1.7 7 5.1" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M30 18h6M30 24h6M30 30h4" stroke={c} strokeWidth="1.5" strokeLinecap="round" opacity="0.55"/>
+      </svg>
+    ),
+    desc: '运动项目、水平标签与运动足迹集中呈现，一页就能判断对方是不是同路人。',
+  },
+  {
+    zh: '女性专属话题群', en: 'WOMEN-ONLY GROUPS',
+    icon: (c) => (
+      <svg viewBox="0 0 48 48" width="28" height="28" fill="none">
+        <circle cx="24" cy="17" r="9" stroke={c} strokeWidth="1.5"/>
+        <path d="M24 26v14M18 34h12" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    desc: '仅向认证女性用户开放的专属话题群，让女性用户在更自在的氛围里开口约运动。',
+  },
+];
+
+const dadaChain = [
+  { n: '01', t: '找搭子', d: '发布运动约局，或在同城搭子广场按项目与时间筛选。' },
+  { n: '02', t: '匹配', d: '运动兴趣、水平、距离与时段多维匹配，推荐真正合拍的人。' },
+  { n: '03', t: '沟通', d: '即时通讯敲定时间、场地与费用，见面前先聊明白。' },
+  { n: '04', t: '线下一起运动', d: '到场汇合开练，把一次约局变成长期的运动习惯。' },
+];
+
+const dadaSafety = [
+  {
+    t: '实名认证',
+    icon: (c) => (
+      <svg viewBox="0 0 48 48" width="24" height="24" fill="none">
+        <rect x="7" y="12" width="34" height="24" rx="4" stroke={c} strokeWidth="1.5"/>
+        <circle cx="18" cy="21" r="3.5" stroke={c} strokeWidth="1.5"/>
+        <path d="M12.5 30c1.2-2.4 3.1-3.6 5.5-3.6s4.3 1.2 5.5 3.6" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M28 22.5l3 3 6-6" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    d: '真实身份核验，从注册环节过滤虚假账号。',
+  },
+  {
+    t: '内容审核',
+    icon: (c) => (
+      <svg viewBox="0 0 48 48" width="24" height="24" fill="none">
+        <path d="M12 7h16l8 8v26H12z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M28 7v8h8" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+        <circle cx="23" cy="27" r="5.5" stroke={c} strokeWidth="1.5"/>
+        <path d="M27.5 31.5L32 36" stroke={c} strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    d: '发布内容与聊天信息经审核机制把关，维护社区氛围。',
+  },
+  {
+    t: '风控',
+    icon: (c) => (
+      <svg viewBox="0 0 48 48" width="24" height="24" fill="none">
+        <circle cx="24" cy="24" r="16" stroke={c} strokeWidth="1.5"/>
+        <circle cx="24" cy="24" r="9" stroke={c} strokeWidth="1" opacity="0.45"/>
+        <path d="M9 24h6.5l3.5-7 5.5 14 3.5-7H39" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    d: '识别异常与骚扰行为，及时预警并介入处置。',
+  },
+  {
+    t: '安全护盾',
+    icon: (c) => (
+      <svg viewBox="0 0 48 48" width="24" height="24" fill="none">
+        <path d="M24 7l14 5v11c0 9.4-5.9 15.8-14 18-8.1-2.2-14-8.6-14-18V12z" stroke={c} strokeWidth="1.5" strokeLinejoin="round"/>
+        <path d="M18 24l4.5 4.5L31 20" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    d: '举报、拉黑与安全提示贯穿全流程，为线下见面兜底。',
+  },
+];
+
+const DaDaPhone = () => (
+  <div style={{width:'100%', maxWidth:280, height:540, borderRadius:34, border:'2px solid rgba(150,200,235,0.2)', background:'#162844', padding:8, boxShadow:`0 24px 70px ${DADA}22`}}>
+    <div style={{height:'100%', borderRadius:26, background:'linear-gradient(180deg, #1B3152, #0E1A2E)', overflow:'hidden', display:'flex', flexDirection:'column'}}>
+      <div style={{padding:'18px 16px 10px'}}>
+        <div className="mono" style={{fontSize:9, color:'var(--text-3)', marginBottom:10}}>9:41</div>
+        <div style={{fontSize:18, fontWeight:700, color:'#F8FAFC'}}>搭子广场</div>
+        <div style={{fontSize:11, color:'var(--text-3)', marginTop:3}}>同城 · 3km 内 · 按开始时间排序</div>
+      </div>
+      <div style={{display:'flex', gap:6, padding:'0 16px 12px', flexWrap:'wrap'}}>
+        {['全部','羽毛球','跑步','篮球'].map((c,i)=>(
+          <div key={i} style={{
+            fontSize:10, padding:'4px 10px', borderRadius:999,
+            background: i===0 ? `${DADA}22` : 'rgba(27,49,82,0.8)',
+            border: `1px solid ${i===0 ? DADA+'55' : 'rgba(150,200,235,0.1)'}`,
+            color: i===0 ? DADA : 'var(--text-3)',
+          }}>{c}</div>
+        ))}
+      </div>
+      <div style={{flex:1, padding:'0 12px', display:'flex', flexDirection:'column', gap:8, overflow:'hidden'}}>
+        {[
+          {a:'羽毛球 · 双打', t:'今晚 19:30', d:'1.2km', j:'3/4'},
+          {a:'夜跑 5km', t:'明早 06:30', d:'800m', j:'5/8'},
+          {a:'篮球 3V3', t:'周六 15:00', d:'2.4km', j:'4/6'},
+          {a:'骑行 20km', t:'周日 08:00', d:'3.0km', j:'2/6'},
+        ].map((s,i)=>(
+          <div key={i} style={{padding:11, background:'rgba(27,49,82,0.85)', borderRadius:12, border:'1px solid rgba(150,200,235,0.1)'}}>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6}}>
+              <div style={{fontSize:12, color:'#F8FAFC', fontWeight:500}}>{s.a}</div>
+              <div className="mono" style={{fontSize:9, color:'var(--text-3)'}}>{s.d}</div>
+            </div>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+              <div style={{fontSize:11, color:'var(--text-2)'}}>{s.t}</div>
+              <div style={{fontSize:10, color:DADA, fontWeight:600}}>{s.j} 人</div>
+            </div>
+          </div>
+        ))}
+        <div style={{padding:'10px 11px', borderRadius:12, background:`${DADA}14`, border:`1px solid ${DADA}33`}}>
+          <div style={{fontSize:10, color:DADA, fontWeight:600, marginBottom:3}}>女性专属话题群</div>
+          <div style={{fontSize:10, color:'var(--text-2)'}}>仅限认证女性用户加入</div>
+        </div>
+      </div>
+      <div style={{display:'flex', borderTop:'1px solid rgba(150,200,235,0.1)', padding:'10px 0 12px'}}>
+        {['广场','消息','我的'].map((t,i)=>(
+          <div key={i} style={{flex:1, textAlign:'center'}}>
+            <div style={{width:5, height:5, borderRadius:3, margin:'0 auto 5px', background: i===0 ? DADA : 'rgba(150,200,235,0.3)'}}/>
+            <div style={{fontSize:9, color: i===0 ? DADA : 'var(--text-3)'}}>{t}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+const DaDa = () => (
+  <section id="product" style={{position:'relative', padding:'140px 48px', borderTop:'1px solid var(--line)', background:'linear-gradient(180deg, var(--bg) 0%, #16202F 50%, var(--bg) 100%)', overflow:'hidden'}}>
+    <div style={{position:'absolute', inset:0, pointerEvents:'none', opacity:0.12, background:`radial-gradient(ellipse at 12% 18%, ${DADA} 0%, transparent 45%)`}}/>
+    <div style={{position:'relative', maxWidth:1400, margin:'0 auto'}}>
+      <SectionHeader
+        eyebrow="SELF-DEVELOPED APP" kicker="自研产品"
+        title={<>嗒搭 · <span style={{color:DADA}}>运动社交平台</span></>}
+        desc="面向运动爱好者的同城运动社交平台。帮助用户找到运动兴趣相投的「运动搭子」，通过即时通讯、个人主页与女性专属话题群，走完从线上匹配到线下一起运动的完整社交链路。"
+        accent={DADA}
+      />
+
+      <div style={{marginTop:80, display:'flex', flexWrap:'wrap', gap:56, alignItems:'flex-start'}}>
+        <div style={{flex:'1 1 460px', minWidth:0}}>
+          <div style={{display:'flex', alignItems:'center', gap:24, padding:'28px 30px', borderRadius:20, border:`1px solid ${DADA}33`, background:'rgba(27,49,82,0.55)', flexWrap:'wrap'}}>
+            <img src="assets/dada-logo.png" alt="嗒搭 APP 图标" width="76" height="76"
+                 style={{display:'block', borderRadius:18, boxShadow:`0 14px 36px ${DADA}33`}}/>
+            <div>
+              <div className="serif" style={{fontSize:32, fontWeight:700, color:'#F8FAFC', letterSpacing:'0.08em', lineHeight:1.1}}>嗒搭</div>
+              <div className="mono" style={{fontSize:11, letterSpacing:'0.3em', color:DADA, marginTop:8}}>SPORTS SOCIAL PLATFORM</div>
+            </div>
+            <div style={{marginLeft:'auto', display:'flex', gap:8, flexWrap:'wrap', justifyContent:'flex-end'}}>
+              {['运动社交','同城搭子','即时通讯','安全合规'].map((t,i)=>(
+                <div key={i} style={{fontSize:12, padding:'6px 14px', borderRadius:999, background:'rgba(14,26,46,0.6)', border:'1px solid rgba(150,200,235,0.12)', color:'var(--text-2)'}}>{t}</div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{marginTop:20, display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(340px, 1fr))', gap:16}}>
+            {dadaFeatures.map((f,i)=>(
+              <div key={i} style={{padding:'24px 24px 26px', borderRadius:16, border:'1px solid rgba(150,200,235,0.1)', background:'rgba(27,49,82,0.5)'}}>
+                <div style={{display:'inline-flex', padding:10, borderRadius:12, background:`${DADA}12`, border:`1px solid ${DADA}22`, marginBottom:16}}>
+                  {f.icon(DADA)}
+                </div>
+                <div className="mono" style={{fontSize:10, letterSpacing:'0.25em', color:DADA, marginBottom:8}}>{f.en}</div>
+                <div style={{fontSize:17, fontWeight:600, color:'#F8FAFC', marginBottom:10}}>{f.zh}</div>
+                <p style={{fontSize:14, color:'var(--text-2)', lineHeight:1.7}}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{flex:'0 1 300px', display:'flex', justifyContent:'center'}}>
+          <DaDaPhone/>
+        </div>
+      </div>
+
+      <div style={{marginTop:56}}>
+        <div className="mono" style={{fontSize:11, letterSpacing:'0.25em', color:'var(--text-3)', marginBottom:20}}>// SOCIAL LOOP · 完整运动社交链路</div>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:14, alignItems:'stretch'}}>
+          {dadaChain.map((s,i)=>(
+            <div key={i} style={{padding:'22px 22px 24px', borderRadius:14, background:'rgba(27,49,82,0.55)', border:'1px solid rgba(150,200,235,0.1)'}}>
+              <div className="mono" style={{display:'flex', alignItems:'center', gap:8, fontSize:10, letterSpacing:'0.2em', color:DADA, marginBottom:10}}>
+                {i > 0 && <span style={{fontSize:14, opacity:0.7}}>→</span>}
+                <span>STEP {s.n}</span>
+              </div>
+              <div style={{fontSize:16, fontWeight:600, color:'#F8FAFC', marginBottom:8}}>{s.t}</div>
+              <div style={{fontSize:13, color:'var(--text-2)', lineHeight:1.65}}>{s.d}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{marginTop:24, padding:'28px 30px 30px', borderRadius:20, border:`1px solid ${DADA}22`, background:'rgba(14,26,46,0.6)'}}>
+        <div style={{display:'flex', alignItems:'center', gap:12, marginBottom:22, flexWrap:'wrap'}}>
+          <div style={{width:8, height:8, borderRadius:4, background:DADA, boxShadow:`0 0 10px ${DADA}`}}/>
+          <div className="mono" style={{fontSize:11, letterSpacing:'0.25em', color:'var(--text-2)'}}>TRUST & SAFETY</div>
+          <div style={{fontSize:14, color:'var(--text-3)'}}>健康、安全的运动社交环境</div>
+        </div>
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(230px, 1fr))', gap:20}}>
+          {dadaSafety.map((s,i)=>(
+            <div key={i} style={{display:'flex', gap:14, alignItems:'flex-start'}}>
+              <div style={{flexShrink:0, display:'inline-flex', padding:8, borderRadius:10, background:`${DADA}12`, border:`1px solid ${DADA}22`}}>{s.icon(DADA)}</div>
+              <div>
+                <div style={{fontSize:15, fontWeight:600, color:'#F8FAFC', marginBottom:6}}>{s.t}</div>
+                <div style={{fontSize:13, color:'var(--text-2)', lineHeight:1.65}}>{s.d}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+/* ───────────────────────── Product · 船舶交易案例 ───────────────────────── */
 
 const PlatformView = ({ accent }) => (
   <div style={{padding:40, height:'100%'}}>
@@ -654,7 +896,7 @@ const Product = ({ accent }) => {
     { id:'lead', zh:'智能获客系统', en:'LEAD ENGINE' },
   ];
   return (
-    <section id="product" style={{position:'relative', padding:'140px 48px', borderTop:'1px solid var(--line)', background:'linear-gradient(180deg, var(--bg) 0%, #132338 100%)'}}>
+    <section id="case" style={{position:'relative', padding:'140px 48px', borderTop:'1px solid var(--line)', background:'linear-gradient(180deg, var(--bg) 0%, #132338 100%)'}}>
       <div style={{maxWidth:1400, margin:'0 auto'}}>
         <SectionHeader
           eyebrow="FLAGSHIP CASE" kicker="产品案例"
@@ -1146,6 +1388,7 @@ const App = () => {
       <Nav accent={accent} user={user} onLogout={handleLogout}/>
       <Hero accent={accent}/>
       <Services accent={accent}/>
+      <DaDa/>
       <Product accent={accent}/>
       <Vision accent={accent}/>
       <Culture accent={accent}/>

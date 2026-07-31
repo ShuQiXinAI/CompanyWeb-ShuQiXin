@@ -5,6 +5,8 @@ handoff/
 # Test artifacts
 .playwright-mcp/
 *.png
+# 站点资源图片需要随 Cloudflare Pages 一起发布
+!assets/*.png
 
 # System
 .DS_Store
@@ -19,3 +21,4 @@ Thumbs.db
 # Maven build output
 backend/target/
 
+.gstack/
